@@ -1,4 +1,4 @@
-# Citations Graph database (Neo4j)
+# Citations Graph Database (Neo4j)
 
 ### Purpose
 We created a graph database in Neo4j and via Neo4j browser, we imported the dataset and wrote queries using Cypher scripting language, which is supported by Neo4j. 
@@ -15,4 +15,3 @@ The dataset consists of the following csv files:
 * AuthorShipRels.csv: Contains info about the relationships between articles and authors (articleId, authorName). 
 * CitedRels.csv: Contains info about citations between articles (articleId, --[Cites]->, articleId). 
 * PublishsRels.csv: Contains info about the relationship between venues and articles (articleId, venueName)
-
