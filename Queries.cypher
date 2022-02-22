@@ -6,7 +6,6 @@
 // MERGE (p)-[:PUBLISHED]->(v);  // an article published to an venue (PublishsRels)
 // MERGE (p1)-[:CITES]->(p2);   // (CitedsRels)
 
-
 // ####### Which are the top 5 authors with the most citations (from other papers). Return author names and number of citations. 
 
 // 1st solution
@@ -31,16 +30,12 @@ LIMIT 5
 // ####### Which are the top 5 authors with the most collaborations (with different authors). Return author names and number of collaborations. 
 
 // WITH: manipulate the output before it is passed on to the following query parts. 
-
 // collect(): gives you the capability to aggregate values into a list. 
 // You can use this to group a set of values based on a particular starting node, relationship, property.
-
 // Counting Values in a List
 // If you have a list of values, you can also find the number of items in that list 
 // or calculate the size of an expression using the size() function.
-
 // COLLECT: collects values into a list (a real list that you can run list operations on).
-
 
 MATCH (author:Authors)-[:WRITES]->(a1:Article)
 MATCH (coauthor:Authors)-[:WRITES]->(a2:Article)
@@ -51,7 +46,6 @@ ORDER BY collaborations_number DESC
 LIMIT 5
 
 // -------------------------------------------------------------------------------------------------
-
 
 // ####### Which is the author who has wrote the most papers without collaborations. Return author name and number of papers. 
 
@@ -66,7 +60,6 @@ RETURN author.name as Author_Name, COUNT(a1) AS count
 ORDER BY count DESC
 LIMIT 1
 
-
 // 2nd solution
 MATCH (author:Authors)-[r:WRITES]->(a1:Article)
 MATCH (coauthor:Authors)-[:WRITES]->(a1:Article)
@@ -78,19 +71,15 @@ LIMIT 1
 
 // -------------------------------------------------------------------------------------------------
 
-
 // ####### Which author published the most papers in 2009? Return author name and number of papers. 
 // year: yparxei san property ston Article Node (integer)
 
-
 // 1st solution 
-
 MATCH (a:Article{year:2009})-[:PUBLISHED]->(v:Venues)
 MATCH (author:Authors)-[:WRITES]->(a)
 RETURN author.name as Author_Name, COUNT(a) AS count
 ORDER BY count DESC
 LIMIT 1
-
 
 // 2nd solution
 MATCH (author:Authors)-[:WRITES]->(a:Article)
@@ -102,13 +91,11 @@ LIMIT 1
 
 // -------------------------------------------------------------------------------------------------
 
-
 // ####### Which is the venue with the most papers on the Data Mining field (derived from the paper title) in 2001. Return venue and number of papers. 
 
 // WHERE a.title CONTAINS 'Data Mining'
 // The CONTAINS operator is used to perform case-sensitive matching regardless of location within a string.
 // For example: Contains will only recognise 'Data Mining' and NOT 'data mining'
-
 // match on regular expressions by using =~ 'regexp',
 // We used regular expressions to match a part of the article title
 
@@ -119,7 +106,6 @@ MATCH (a)-[:PUBLISHED]->(v:Venues)
 RETURN v.name as Venue_Name, COUNT(a) AS count
 ORDER BY count DESC
 LIMIT 1
-
 
 // 2nd solution
 MATCH (a:Article{year:2001})
@@ -160,22 +146,17 @@ ORDER BY Paper_name      // for alphabetical order
 
 // -------------------------------------------------------------------------------------------------
 
-
 // ####### Find the shortest path between ‘Rakesh Agrawal’ and ‘Donald E. Knuth’ authors. Return the length of the path and the paper titles of the path. 
 
 // We have an unweighted graph
-
 // Added 2 labels, created 2 nodes, set 2 properties
 // a:Authors{name:'Rakesh Agrawal'}  // start node
 // f:Authors{name:'Donald E. Knuth'}  // end node
-
 
 // SHORTEST PATH
 MATCH (a:Authors{name:'Rakesh Agrawal'}),(f:Authors{name:'Donald E. Knuth'}), p = shortestPath((a)-[*]-(f))
 // MATCH p = shortestPath((a:Author{name:'Rakesh Agrawal'})-[*]-(f:Author{name:'Donald E. Knuth'}))
 RETURN [n in nodes(p) | n.title] AS ShortestPath, length(p) as Length
-
-
 
 // # Extra plot:
 MATCH (a:Authors{name:'Rakesh Agrawal'}),(f:Authors{name:'Donald E. Knuth'}), p = shortestPath((a)-[*]-(f))
@@ -185,12 +166,10 @@ RETURN p
 
 // ####### Find all authors with maximum shortest path length 3 from author ‘Jeffrey D. Ullman’. Return the length and the paper titles for each path. 
 
-
 // Variable-length pattern matching
 // To describe paths of length 5 or less, use:
 // (a)-[*..5]->(b)
 // https://neo4j.com/docs/cypher-manual/current/syntax/patterns/#cypher-pattern-varlength
-
 
 MATCH (f:Authors), p = shortestPath((c:Authors{name:'Jeffrey D. Ullman'})-[*..3]-(f:Authors))
 Where f<>c 
@@ -213,14 +192,11 @@ order by Path_length DESC
 // Verifying installation
 RETURN gds.version()
 
-
-
 CALL gds.graph.create(
     'myGraph',
     'Article',   // Article Node
     'CITES'     // CITES Relationship
 )
-
 
 CALL gds.pageRank.stream('myGraph',
 { maxIterations: 20, dampingFactor: 0.85 })
@@ -228,4 +204,3 @@ YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).title AS Article_title, score as PageRank_score
 ORDER BY PageRank_score DESC, Article_title ASC
 LIMIT 10
-
