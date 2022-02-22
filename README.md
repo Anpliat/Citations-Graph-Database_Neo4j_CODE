@@ -4,7 +4,10 @@
 We created a graph database in Neo4j and via Neo4j browser, we imported the dataset and wrote queries using Cypher scripting language, which is supported by Neo4j. 
 
 ### Dataset
-The data were derived from the DBLP citation network, which contains authors, articles, venues and citations between articles. The dataset consists of the following csv files: 
+The data were derived from the DBLP citation network, which contains authors, articles, venues and citations between articles. 
+The dataset can be downloaded from: 
+
+The dataset consists of the following csv files: 
 * ArticleNodes.csv: Contains info about Article nodes (id, title, year, abstract). 
 * AuthorNodes.csv: Contains the names of the authors. 
 * VenueNodes.csv: Contains the names of the venues. 
