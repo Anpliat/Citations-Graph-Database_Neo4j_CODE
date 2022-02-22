@@ -5,9 +5,7 @@ We created a graph database in Neo4j and via Neo4j browser, we imported the data
 
 ### Dataset
 The data were derived from the DBLP citation network, which contains authors, articles, venues and citations between articles. 
-The dataset can be downloaded from: 
-
-https://drive.google.com/file/d/1bFEB_GxhPXT-xWEbK8hCUrR-TjdnqlYv/view?usp=sharing
+The dataset can be downloaded from: https://drive.google.com/file/d/1bFEB_GxhPXT-xWEbK8hCUrR-TjdnqlYv/view?usp=sharing
 
 
 The dataset consists of the following csv files: 
