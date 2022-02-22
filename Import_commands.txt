@@ -1,0 +1,209 @@
+----move files to path in order to be imported----------
+C:\...\.Neo4jDesktop\neo4jDatabases\database-e3775c81-c168-42ad-8b78-c34ba55bb598\installation-4.0.4\import
+
+
+// Read the first line of the CSV-Cypher (check for required properties)
+// :auto USING PERIODIC COMMIT
+// LOAD CSV WITH HEADERS FROM
+LOAD CSV FROM 'file:///ArticleNodes.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1;
+
+// =>  "id", "title", "year", "abstract"
+
+LOAD CSV FROM 'file:///AuthorNodes.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1; 
+// =>  [ "Hoon Hong" ]
+
+LOAD CSV FROM 'file:///AuthorShipRels.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1;
+// => [ "0", "Hoon Hong" ]
+
+LOAD CSV FROM 'file:///CitedsRels.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1;
+// =>  [ "5", "436405" ]
+
+LOAD CSV FROM 'file:///PublishsRels.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1;
+// =>  [ "0", null ]
+
+
+LOAD CSV FROM 'file:///VenueNodes.csv' AS line
+FIELDTERMINATOR ';'
+RETURN line
+limit 1;
+// =>  [ "Proceedings of the 6th international workshop on Software and performance,,,,,,,,,,," ]
+
+// ===================================================
+// ===================================================
+
+
+// Create: All Nodes Indexes (unique constraint)
+// Uniqueness constraints.
+
+// Create a unique node property constraint.
+// Create Contraints
+CREATE CONSTRAINT ON (a:Article) ASSERT a.id IS UNIQUE;   
+CREATE CONSTRAINT ON (a:Authors) ASSERT a.name IS UNIQUE;    
+CREATE CONSTRAINT ON (v:Venues) ASSERT v.name IS UNIQUE;    
+
+
+-----Constraints-----
+// Adding a unique property constraint on a property will also add a single-property index on that property, so such an index cannot be added separately.
+// Cypher will use these indexes for lookups just like other indexes.
+// Adding the unique constraint will implicitly add an index on that property.
+
+// Display constraints and indexes
+:schema
+
+
+
+// load data into neo4j
+
+// -----------------  ArticleNodes.csv  -----------------  
+
+//Load Nodes: Article
+:auto USING PERIODIC COMMIT 100000
+LOAD CSV FROM 'file:///ArticleNodes.csv' AS line
+FIELDTERMINATOR ';'
+WITH line
+WHERE line[0] IS NOT NULL        // id: is not null
+MERGE (artic:Article {id: toInteger(line[0]),
+title: coalesce(line[1], "Unknown"),
+year: toInteger(line[2]),
+abstract: coalesce(line[3], "Unknown")})
+
+
+
+// coalesce(): returns the first non-null value in the given list of expressions.
+// Use COALESCE() to use a default for a null value
+
+// MERGE command is a combination of CREATE and MATCH command. This command is used to search for a given pattern in the graph.
+// If it exists in the graph then it will return the result
+// otherwise, it creates a new node/relationship and returns the results.
+
+
+// -----------------  AuthorNodes.csv  -----------------  
+
+// 1 column only. We do not need the FIELDTERMINATOR
+
+:auto USING PERIODIC COMMIT 100000
+LOAD CSV FROM 'file:///AuthorNodes.csv' AS line
+WITH line
+WHERE line[0] IS NOT NULL        // Author_name: is not null
+MERGE (author:Authors {name:line[0]})
+
+
+// -------------  VenueNodes.csv  -----------------  
+
+// 1 column only. We do not need the FIELDTERMINATOR
+
+:auto USING PERIODIC COMMIT 100000
+LOAD CSV FROM 'file:///VenueNodes.csv' AS line
+FIELDTERMINATOR ';'
+WITH line
+MERGE (venue:Venues {name:line[0]})
+
+// MERGE (venue:Venues {name:coalesce(line[0], "Unknown")})
+// MERGE (venue:Venues {name: line[0]})
+// CREATE (venue:Venues {name:coalesce(line[0], "Unknown")})
+
+
+
+// 		############# Relationships #########
+
+// -----------------  AuthorShipRels.csv  -----------------  
+
+
+// Load WRITES relationship (AuthorShipRels)
+
+:auto USING PERIODIC COMMIT
+LOAD CSV FROM 'file:///AuthorShipRels.csv' AS line
+FIELDTERMINATOR ';'
+WITH line
+WHERE line[0] IS NOT NULL        // articleId: is not null
+//look up the two nodes we want to connect up
+MATCH (artic13:Article { id: toInteger(line[0]) })
+MATCH (author13:Authors { name: line[1] })
+//create a relationship between them
+MERGE (author13)-[:WRITES]->(artic13);
+
+
+// -----------------  PublishsRels.csv  -----------------  
+
+
+// Load PUBLISHED relationship (PublishsRels)
+
+:auto USING PERIODIC COMMIT
+LOAD CSV FROM 'file:///PublishsRels.csv' AS line
+FIELDTERMINATOR ';'
+WITH line
+WHERE line[0] IS NOT NULL        // articleId: is not null
+//look up the two nodes we want to connect up
+MATCH (artic24:Article { id: toInteger(line[0]) })
+MATCH (venue24:Venues { name: line[1]})  // or venue:Venues { venueName:
+//create a relationship between them
+MERGE (artic24)-[:PUBLISHED]->(venue24);
+
+// -----------------  CitedsRels.csv  ----------------- 
+ 
+
+// Load CITES relationship (CitedsRels)
+
+:auto USING PERIODIC COMMIT
+LOAD CSV FROM 'file:///CitedsRels.csv' AS line
+FIELDTERMINATOR ';'
+WITH line
+WHERE line[0] IS NOT NULL        // articleId: is not null
+//look up the two nodes we want to connect up
+MATCH (p1:Article { id: toInteger(line[0])}), (p2:Article { id: toInteger(line[1])})
+//create a relationship between them
+MERGE (p1)-[:CITES]->(p2);
+
+
+# ===================================================
+
+// Delete the relationship named "PLAYER_OF" from the database:
+
+# MATCH (artic24)-[r:PUBLISHED]->(venue24)  
+# DELETE r  
+
+
+
+
+// Relationship counts
+MATCH ()-[r:WRITES]->()
+RETURN count(r) as WRITES _count
+MATCH ()-[r:PUBLISHED]->()
+RETURN count(r) as PUBLISHED _count
+MATCH ()-[r:CITES]->()
+RETURN count(r) as CITES_count
+
+
+
+
+// Node counts:
+MATCH (n:Article)
+RETURN count(n) as Article_nodes
+MATCH (n:Authors)
+RETURN count(n) as Author_nodes
+MATCH (n:Venues)
+RETURN count(n) as Venue_nodes
+
+
+
+// Visualization for a small sample of the relationships
+MATCH (auth:Authors)-[:WRITES]->(a:Article)    
+MATCH (art:Article)-[:PUBLISHED]->(v:Venues)      
+MATCH (a1:Article)-[:CITES]->(a2:Article)         
+RETURN auth,a,art,v,a1,a2            
+LIMIT 3
