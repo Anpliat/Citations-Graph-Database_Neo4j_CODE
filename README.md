@@ -1,6 +1,6 @@
 # Citations Graph Database (Neo4j)
 
-### Purpose
+### Scope
 We created a graph database in Neo4j and via Neo4j browser, we imported the dataset and wrote queries using Cypher scripting language, which is supported by Neo4j. 
 
 ### Dataset
