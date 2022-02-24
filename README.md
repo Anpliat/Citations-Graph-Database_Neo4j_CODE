@@ -9,9 +9,11 @@ The dataset can be downloaded from: https://drive.google.com/file/d/1bFEB_GxhPXT
 
 
 The dataset consists of the following csv files: 
-* ArticleNodes.csv: Contains info about Article nodes (id, title, year, abstract). 
-* AuthorNodes.csv: Contains the names of the authors. 
-* VenueNodes.csv: Contains the names of the venues. 
-* AuthorShipRels.csv: Contains info about the relationships between articles and authors (articleId, authorName). 
-* CitedRels.csv: Contains info about citations between articles (articleId, --[Cites]->, articleId). 
-* PublishsRels.csv: Contains info about the relationship between venues and articles (articleId, venueName)
+Filename | Content
+--- | ---
+ArticleNodes.csv | Contains info about Article nodes (id, title, year, abstract). 
+AuthorNodes.csv | Contains the names of the authors. 
+VenueNodes.csv | Contains the names of the venues. 
+AuthorShipRels.csv | Contains info about the relationships between articles and authors (articleId, authorName). 
+CitedRels.csv | Contains info about citations between articles (articleId, --[Cites]->, articleId). 
+PublishsRels.csv | Contains info about the relationship between venues and articles (articleId, venueName)
